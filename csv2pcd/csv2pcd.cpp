@@ -5,20 +5,24 @@
 #include <iostream>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
+#include <pcl/console/parse.h>
 #include <time.h>
 int main (int argc, char* argv[]){
-
+/*
 	if(argc<2){
 		std::cout << "No input file given" << std::endl;
 		return 0;
 	}
-
+*/
 	std::ifstream fCSV;
+	std::string sFileIn, sFileOut;
 
 	try{
-		fCSV.open(argv[1]);
+		pcl::console::parse_argument(argc, argv, "-i", sFileIn);
+		fCSV.open(sFileIn.c_str());
 	}catch(const std::exception &e){
-		std::cout << "Problem opening file '" << argv[1] << "'" << std::endl;
+		std::cout << "Problem opening file '" << sFileIn << "'" << std::endl;
+		return 0;
 	}
 
 
@@ -87,8 +91,14 @@ int main (int argc, char* argv[]){
 		cloud.points[i].z = 1024 * rand () / (RAND_MAX + 1.0f);
 	}
 */
-	pcl::io::savePCDFileASCII (argv[2], cloud);
-	std::cerr << "Saved " << cloud.points.size () << " data points to '" << argv[2] << "'"  << std::endl;
+	try{
+		pcl::console::parse_argument(argc, argv, "-o", sFileOut); 
+	}catch(const std::exception &e){
+		sFileOut = "my_point_cloud.pcd";
+	}
+
+	pcl::io::savePCDFileASCII (sFileOut.c_str(), cloud);
+	std::cerr << "Saved " << cloud.points.size () << " data points to '" << sFileOut << "'"  << std::endl;
 
 	for (size_t i = 0; i < cloud.points.size (); ++i)
 		std::cerr << "    " << cloud.points[i].x << " " << cloud.points[i].y << " " << cloud.points[i].z << std::endl;
