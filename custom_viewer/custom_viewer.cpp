@@ -5,6 +5,7 @@
 #include <iostream>
 #include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
+#include <pcl/console/parse.h>
 
 int user_data;
 
@@ -29,9 +30,22 @@ void viewerPsycho (pcl::visualization::PCLVisualizer& viewer){
 	user_data++;
 }
 
-int main (){
+int main (int argc, char* argv[]){
+
+	std::string sFilename;
+	try{
+		pcl::console::parse_argument(argc, argv, "-i", sFilename);
+	}catch(const std::exception &e){
+		sFilename = "my_point_cloud.pcd";
+	}
+
 	pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);
-	pcl::io::loadPCDFile ("my_point_cloud.pcd", *cloud);
+	pcl::io::loadPCDFile (sFilename.c_str(), *cloud);
+
+
+
+	pcl::PolygonMesh pMesh();
+
 
 	pcl::visualization::CloudViewer viewer("Cloud Viewer");
 
