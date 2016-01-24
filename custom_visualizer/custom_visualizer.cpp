@@ -247,6 +247,8 @@ main (int argc, char** argv){
 		return 0;
 	}
 
+
+
 	// ------------------------------------
 	// -----Create example point cloud-----
 	// ------------------------------------
@@ -321,6 +323,41 @@ main (int argc, char** argv){
 		viewer = interactionCustomizationVis();
 	}
 
+
+
+///*
+	// -------------------------------------
+	// -----Create example polygon mesh-----
+	// -------------------------------------
+	
+	pcl::PolygonMesh pMesh;
+	pcl::Vertices vVertices;
+	std::vector<pcl::Vertices> vecVertices;
+//	boost::shared_ptr< ::pcl::PolygonMesh> ptr;
+	vVertices.vertices.push_back(0);
+	vVertices.vertices.push_back(1);
+	vVertices.vertices.push_back(29);
+	vVertices.vertices.push_back(30);
+/*
+	vVertices.vertices.push_back(30);
+	vVertices.vertices.push_back(45);
+	vVertices.vertices.push_back(46);
+	vVertices.vertices.push_back(46);
+*/
+	pMesh.polygons.push_back(vVertices);
+
+	vecVertices.push_back(vVertices);
+
+	const std::string sLabel = "surface";
+//	viewer->addPolygonMesh(pMesh, "triangles" ,0);
+	viewer->addPolygonMesh<pcl::PointXYZRGB>(point_cloud_ptr, vecVertices, sLabel, 0);
+//	viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1.0f, 1.0f, 1.0f, sLabel) ;
+
+/*
+	viewer->setShapeRenderingProperties(PCL_VISUALIZER_SHADING,PCL_VISUALIZER_SHADING_FLAT, sLabel);
+	viewer->setShapeRenderingProperties(PCL_VISUALIZER_SHADING,PCL_VISUALIZER_SHADING_GOURAUD, sLabel);
+	viewer->setShapeRenderingProperties(PCL_VISUALIZER_SHADING,PCL_VISUALIZER_SHADING_PHONG, sLabel);
+*/
 	//--------------------
 	// -----Main loop-----
 	//--------------------
