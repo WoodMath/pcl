@@ -28,6 +28,7 @@ void printUsage (const char* progName){
 		<< "-a           Shapes visualisation example\n"
 		<< "-v           Viewports example\n"
 		<< "-i           Interaction Customization example\n"
+		<< "-f FILENAME	 Name of file to load\n"
 		<< "\n\n";
 }
 
@@ -218,6 +219,7 @@ main (int argc, char** argv){
 		printUsage (argv[0]);
 		return 0;
 	}
+
 	bool simple(false), rgb(false), custom_c(false), normals(false),
 	shapes(false), viewports(false), interaction_customization(false);
 	if (pcl::console::find_argument (argc, argv, "-s") >= 0){
@@ -283,10 +285,33 @@ main (int argc, char** argv){
 			b += 12;
 		}
 	}
+
+
+
+	if(pcl::console::find_argument(argc, argv, "-f") >= 0){
+
+
+	        std::string sFilename;
+        	try{
+                	pcl::console::parse_argument(argc, argv, "-f", sFilename);
+        	}catch(const std::exception &e){
+                	sFilename = "my_point_cloud.pcd";
+        	}
+
+//        	pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);
+//        	pcl::io::loadPCDFile (sFilename.c_str(), *cloud);
+		pcl::io::loadPCDFile(sFilename.c_str(), *basic_cloud_ptr);
+		pcl::io::loadPCDFile(sFilename.c_str(), *point_cloud_ptr);	
+
+
+	}
+
+
 	basic_cloud_ptr->width = (int) basic_cloud_ptr->points.size ();
 	basic_cloud_ptr->height = 1;
 	point_cloud_ptr->width = (int) point_cloud_ptr->points.size ();
 	point_cloud_ptr->height = 1;
+
 
 	// ----------------------------------------------------------------
 	// -----Calculate surface normals with a search radius of 0.05-----

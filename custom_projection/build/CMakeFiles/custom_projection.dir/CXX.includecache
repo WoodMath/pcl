@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/jeff/Dropbox/Wood_Kamangar/cse5393/pcl/greedy_projection/greedy_projection.cpp
+/home/jeff/Dropbox/Wood_Kamangar/cse5393/pcl/custom_projection/custom_projection.cpp
 pcl/point_types.h
 -
 pcl/io/pcd_io.h
