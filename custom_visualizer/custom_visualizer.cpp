@@ -21,18 +21,18 @@ void printUsage (const char* progName){
 	std::cout << "\n\nUsage: "<<progName<<" [options]\n\n"
 		<< "Options:\n"
 		<< "-------------------------------------------\n"
-		<< "-h          	this help\n"
-		<< "-s          	Simple visualisation example\n"
-		<< "-r          	RGB colour visualisation example\n"
-		<< "-c          	Custom colour visualisation example\n"
-		<< "-n          	Normals visualisation example\n"
-		<< "-a          	Shapes visualisation example\n"
-		<< "-v          	Viewports example\n"
-		<< "-i          	Interaction Customization example\n"
+		<< "-h			this help\n"
+		<< "-s			Simple visualisation example\n"
+		<< "-r			RGB colour visualisation example\n"
+		<< "-c			Custom colour visualisation example\n"
+		<< "-n			Normals visualisation example\n"
+		<< "-a			Shapes visualisation example\n"
+		<< "-v			Viewports example\n"
+		<< "-i			Interaction Customization example\n"
 		<< "-f FILENAME		Name of file to load\n"
 		<< "-SR DOUBLE		Set Search Radius\n"
 		<< "-Mu DOUBLE		Set Mu\n"
-		<< "-MNN UNSIGNED	Set Maximum Nearest Neighbors\n"
+		<< "-MNN UNSIGNED		Set Maximum Nearest Neighbors\n"
 		<< "-MSA DOUBLE		Set Maximum Surface Angle\n"
 		<< "-NC BOOLEAN		Set Normal Consistancy\n"
 /*
@@ -306,11 +306,23 @@ main (int argc, char** argv){
 	double fMSA = M_PI/4;
 	bool bNC = false;
 
-	pcl::console::parse_argument(argc, argv, "-SR", fSR);
-	pcl::console::parse_argument(argc, argv, "-Mu", fMu);
-	pcl::console::parse_argument(argc, argv, "-MNN", uMNN);
-	pcl::console::parse_argument(argc, argv, "-MSA", fMSA);
-	pcl::console::parse_argument(argc, argv, "-NC", bNC);
+	if(pcl::console::find_argument (argc, argv, "-SR") >= 0) 
+		pcl::console::parse_argument(argc, argv, "-SR", fSR);
+	if(pcl::console::find_argument (argc, argv, "-Mu") >= 0)	
+		pcl::console::parse_argument(argc, argv, "-Mu", fMu);
+	if(pcl::console::find_argument (argc, argv, "-MNN") >= 0)
+		pcl::console::parse_argument(argc, argv, "-MNN", uMNN);
+	if(pcl::console::find_argument (argc, argv, "-MSA") >= 0)
+		pcl::console::parse_argument(argc, argv, "-MSA", fMSA);
+	if(pcl::console::find_argument (argc, argv, "-NC") >= 0)
+		pcl::console::parse_argument(argc, argv, "-NC", bNC);
+
+	std::cout << " Search Radius : " << fSR << std::endl;
+	std::cout << " Mu : " << fMu << std::endl;
+	std::cout << " Maximum Nearest Neighbors : " << uMNN << std::endl;
+	std::cout << " Maximum Surface Angle : " << fMSA << std::endl;
+	std::cout << " Normal Consistency : " << bNC << std::endl;
+
 
 	if(pcl::console::find_argument(argc, argv, "-f") >= 0){
 
@@ -430,16 +442,16 @@ main (int argc, char** argv){
 	pcl::PolygonMesh triangles;
 
 	// Set the maximum distance between connected points (maximum edge length)
-	gp3.setSearchRadius (0.025);
+	gp3.setSearchRadius (fSR);
 
 
 	// Set typical values for the parameters
-	gp3.setMu (2.5);
-	gp3.setMaximumNearestNeighbors (100);
-	gp3.setMaximumSurfaceAngle(M_PI/4); // 45 degrees
+	gp3.setMu (fMu);
+	gp3.setMaximumNearestNeighbors (uMNN);
+	gp3.setMaximumSurfaceAngle(fMSA); // 45 degrees
 	gp3.setMinimumAngle(M_PI/18); // 10 degrees
 	gp3.setMaximumAngle(2*M_PI/3); // 120 degrees
-	gp3.setNormalConsistency(false);
+	gp3.setNormalConsistency(bNC);
 
 	// Get result
 	gp3.setInputCloud (cat_cloud_normals1);
@@ -479,6 +491,8 @@ main (int argc, char** argv){
 
 //	const std::string sLabel = "surface";
 	viewer->addPolygonMesh(triangles, "triangles" ,0);
+
+
 //	viewer->addPolygonMesh<pcl::PointXYZRGB>(point_cloud_ptr, point_cloud_surface., sLabel, 0);
 //	viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1.0f, 1.0f, 1.0f, sLabel) ;
 
