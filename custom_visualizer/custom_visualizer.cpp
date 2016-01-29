@@ -12,7 +12,8 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/console/parse.h>
-
+#include <pcl/surface/reconstruction.h>
+#include <pcl/surface/gp3.h>
 // --------------
 // -----Help-----
 // --------------
@@ -20,15 +21,27 @@ void printUsage (const char* progName){
 	std::cout << "\n\nUsage: "<<progName<<" [options]\n\n"
 		<< "Options:\n"
 		<< "-------------------------------------------\n"
-		<< "-h           this help\n"
-		<< "-s           Simple visualisation example\n"
-		<< "-r           RGB colour visualisation example\n"
-		<< "-c           Custom colour visualisation example\n"
-		<< "-n           Normals visualisation example\n"
-		<< "-a           Shapes visualisation example\n"
-		<< "-v           Viewports example\n"
-		<< "-i           Interaction Customization example\n"
-		<< "-f FILENAME	 Name of file to load\n"
+		<< "-h          	this help\n"
+		<< "-s          	Simple visualisation example\n"
+		<< "-r          	RGB colour visualisation example\n"
+		<< "-c          	Custom colour visualisation example\n"
+		<< "-n          	Normals visualisation example\n"
+		<< "-a          	Shapes visualisation example\n"
+		<< "-v          	Viewports example\n"
+		<< "-i          	Interaction Customization example\n"
+		<< "-f FILENAME		Name of file to load\n"
+		<< "-SR DOUBLE		Set Search Radius\n"
+		<< "-Mu DOUBLE		Set Mu\n"
+		<< "-MNN UNSIGNED	Set Maximum Nearest Neighbors\n"
+		<< "-MSA DOUBLE		Set Maximum Surface Angle\n"
+		<< "-NC BOOLEAN		Set Normal Consistancy\n"
+/*
+	pcl::console::parse_argument(argc, argv, "-SR", fSR);
+	pcl::console::parse_argument(argc, argv, "-Mu", fMu);
+	pcl::console::parse_argument(argc, argv, "-MNN", uMNN);
+	pcl::console::parse_argument(argc, argv, "-MSA", fMSA);
+	pcl::console::parse_argument(argc, argv, "-NC", bNC);
+*/
 		<< "\n\n";
 }
 
@@ -287,6 +300,17 @@ main (int argc, char** argv){
 	}
 
 
+	float fSR = 0.025;
+	double fMu = 2.5;
+	unsigned int uMNN = 100;
+	double fMSA = M_PI/4;
+	bool bNC = false;
+
+	pcl::console::parse_argument(argc, argv, "-SR", fSR);
+	pcl::console::parse_argument(argc, argv, "-Mu", fMu);
+	pcl::console::parse_argument(argc, argv, "-MNN", uMNN);
+	pcl::console::parse_argument(argc, argv, "-MSA", fMSA);
+	pcl::console::parse_argument(argc, argv, "-NC", bNC);
 
 	if(pcl::console::find_argument(argc, argv, "-f") >= 0){
 
@@ -305,7 +329,6 @@ main (int argc, char** argv){
 
 
 	}
-
 
 	basic_cloud_ptr->width = (int) basic_cloud_ptr->points.size ();
 	basic_cloud_ptr->height = 1;
@@ -355,27 +378,108 @@ main (int argc, char** argv){
 	// -----Create example polygon mesh-----
 	// -------------------------------------
 	
-	pcl::PolygonMesh pMesh;
-	pcl::Vertices vVertices;
-	std::vector<pcl::Vertices> vecVertices;
+	pcl::PolygonMesh pMeshBasic;
+	pcl::PolygonMesh pMeshCloud;
+
+
+/*
+	pcl::SurfaceReconstruction<pcl::PointXYZ> basic_cloud_surface;
+	pcl::SurfaceReconstruction<pcl::PointXYZRGB> point_cloud_surface;
+
+	basic_cloud_surface.setInputCloud(basic_cloud_surface);
+	point_cloud_surface.setInputCloud(point_cloud_surface);
+
+	basic_cloud_surface.reconstruct(pMeshBasic);
+	point_cloud_surface.reconstruct(pMeshCloud);
+*/
+
+
+
+	//////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////
+
+
+//	pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
+//	pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
+//	pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
+//	tree->setInputCloud (cloud)nt;
+//	ne.setInputCloud (cloud);
+//	ne.setSearchMethod (tree);
+//	ne.setKSearch (20);
+//	ne.compute (*normals);
+	//* normals should not contain the point normals + surface curvatures
+
+	// Concatenate the XYZ and normal fields*
+	pcl::PointCloud<pcl::PointNormal>::Ptr cat_cloud_normals1 (new pcl::PointCloud<pcl::PointNormal>);
+	pcl::concatenateFields (*basic_cloud_ptr, *cloud_normals1, *cat_cloud_normals1);
+	//* cloud_with_normals = cloud + normals
+
+	// Concatenate the XYZ and normal fields*
+	pcl::PointCloud<pcl::PointNormal>::Ptr cat_cloud_normals2 (new pcl::PointCloud<pcl::PointNormal>);
+//	pcl::concatenateFields (*point_cloud_ptr, *cloud_normals2, *cat_cloud_normals2);
+	//* cloud_with_normals = cloud + normals
+
+
+	// Create search tree*
+//	pcl::search::KdTree<pcl::PointNormal>::Ptr tree2 (new pcl::search::KdTree<pcl::PointNormal>);
+//	tree2->setInputCloud (cat_cloud_normals1);
+
+	// Initialize objects
+	pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
+	pcl::PolygonMesh triangles;
+
+	// Set the maximum distance between connected points (maximum edge length)
+	gp3.setSearchRadius (0.025);
+
+
+	// Set typical values for the parameters
+	gp3.setMu (2.5);
+	gp3.setMaximumNearestNeighbors (100);
+	gp3.setMaximumSurfaceAngle(M_PI/4); // 45 degrees
+	gp3.setMinimumAngle(M_PI/18); // 10 degrees
+	gp3.setMaximumAngle(2*M_PI/3); // 120 degrees
+	gp3.setNormalConsistency(false);
+
+	// Get result
+	gp3.setInputCloud (cat_cloud_normals1);
+//	gp3.setSearchMethod (tree2);
+	gp3.reconstruct (triangles);
+
+	// Additional vertex information
+	std::vector<int> parts = gp3.getPartIDs();
+	std::vector<int> states = gp3.getPointStates();
+
+
+
+
+	//////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////
+
+
+
+
+
+
 //	boost::shared_ptr< ::pcl::PolygonMesh> ptr;
-	vVertices.vertices.push_back(0);
-	vVertices.vertices.push_back(1);
-	vVertices.vertices.push_back(29);
-	vVertices.vertices.push_back(30);
+//	vVertices.vertices.push_back(0);
+//	vVertices.vertices.push_back(1);
+//	vVertices.vertices.push_back(29);
+//	vVertices.vertices.push_back(30);
 /*
 	vVertices.vertices.push_back(30);
 	vVertices.vertices.push_back(45);
 	vVertices.vertices.push_back(46);
 	vVertices.vertices.push_back(46);
 */
-	pMesh.polygons.push_back(vVertices);
+//	pMesh.polygons.push_back(vVertices);
 
-	vecVertices.push_back(vVertices);
+//	vecVertices.push_back(vVertices);
 
-	const std::string sLabel = "surface";
-//	viewer->addPolygonMesh(pMesh, "triangles" ,0);
-	viewer->addPolygonMesh<pcl::PointXYZRGB>(point_cloud_ptr, vecVertices, sLabel, 0);
+//	const std::string sLabel = "surface";
+	viewer->addPolygonMesh(triangles, "triangles" ,0);
+//	viewer->addPolygonMesh<pcl::PointXYZRGB>(point_cloud_ptr, point_cloud_surface., sLabel, 0);
 //	viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, 1.0f, 1.0f, 1.0f, sLabel) ;
 
 /*

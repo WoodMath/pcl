@@ -19,6 +19,8 @@ pcl/surface/gp3.h
 -
 pcl/io/vtk_io.h
 -
+pcl/surface/reconstruction.h
+-
 
 /usr/include/eigen3/Eigen/Cholesky
 Core
