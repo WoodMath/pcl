@@ -5,6 +5,8 @@
 
 
 #include <iostream>
+#include "../rapidjson/writer.h"
+#include "../rapidjson/stringbuffer.h"
 
 #include <boost/thread/thread.hpp>
 #include <pcl/common/common_headers.h>
@@ -17,6 +19,15 @@
 // --------------
 // -----Help-----
 // --------------
+
+void outputData(){
+
+	rapidjson::StringBuffer s;
+	rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+
+
+}
+
 void printUsage (const char* progName){
 	std::cout << "\n\nUsage: "<<progName<<" [options]\n\n"
 		<< "Options:\n"
